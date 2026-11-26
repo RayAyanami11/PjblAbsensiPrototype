@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#76232e">
+  <title>Absensi XI.3</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="cap">🎓</span><div><b>QR ABSENSI</b><small>KELAS XI.3</small></div></div>
+    <button id="logoutBtn" class="ghost hidden">Keluar</button>
+  </header>
+
+  <main class="wrap">
+    <section id="authView" class="panel auth-panel">
+      <div class="eyebrow">SISTEM INFORMASI KELAS</div>
+      <h1>Selamat datang</h1>
+      <p class="muted">Masuk sebagai siswa atau guru untuk mengakses sistem absensi kelas XI.3.</p>
+      <div class="tabs">
+        <button id="loginTab" class="tab active">Masuk</button>
+        <button id="registerTab" class="tab">Daftar akun</button>
+      </div>
+      <form id="authForm">
+        <label id="nameLabel" class="hidden">Nama lengkap<input id="nameInput" autocomplete="name"></label>
+        <label>Email<input id="emailInput" type="email" required autocomplete="email"></label>
+        <label>Password<input id="passwordInput" type="password" required minlength="6" autocomplete="current-password"></label>
+        <button class="primary full" type="submit" id="authSubmit">Masuk</button>
+      </form>
+      <p id="authMessage" class="message" aria-live="polite"></p>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="welcome">
+        <div><div class="eyebrow" id="dashboardRole">DASHBOARD SISWA</div><h1>Halo, <span id="welcomeName">Siswa</span></h1><p class="muted" id="dashboardSubtitle">Pantau kehadiranmu di kelas XI.3.</p></div>
+        <div class="avatar" id="avatar">XI</div>
+      </div>
+
+      <nav class="nav">
+        <button class="navbtn active" data-page="dashboard">Dashboard</button>
+        <button class="navbtn" data-page="profile">Profil</button>
+        <button class="navbtn" data-page="attendance">Absensi</button>
+        <button class="navbtn" data-page="history">Riwayat</button>
+        <button class="navbtn staff-only hidden" data-page="students">Daftar siswa</button>
+        <button class="navbtn staff-only hidden" data-page="admin">Persetujuan absensi</button>
+      </nav>
+
+      <section id="page-dashboard" class="page">
+        <div class="stats">
+          <article class="stat"><small>Total catatan</small><b id="statTotal">0</b></article>
+          <article class="stat"><small>Hadir</small><b id="statHadir">0</b></article>
+          <article class="stat"><small>Izin</small><b id="statIzin">0</b></article>
+          <article class="stat"><small>Sakit</small><b id="statSakit">0</b></article>
+        </div>
+        <div class="panel">
+          <h2>Absensi hari ini</h2>
+          <p id="todayStatus" class="muted">Belum ada catatan absensi hari ini.</p>
+          <button class="primary" data-goto="attendance">Isi absensi</button>
+        </div>
+      </section>
+
+      <section id="page-profile" class="page hidden">
+        <div class="panel">
+          <h2>Profil akun</h2>
+          <div class="profile-head">
+            <img id="profilePhoto" alt="Foto profil" src="">
+            <div><b id="profileName">-</b><small id="profileEmail" class="muted block">-</small></div>
+          </div>
+          <form id="profileForm">
+            <label>Nama lengkap<input id="profileNameInput" required maxlength="80"></label>
+            <label>Nomor absen<input id="profileNumberInput" type="number" min="1" max="60" required></label>
+            <label>Foto profil (opsional)<input id="profileFile" type="file" accept="image/jpeg,image/png,image/webp"></label>
+            <button class="primary" type="submit">Simpan profil</button>
+          </form>
+          <p id="profileMessage" class="message"></p>
+        </div>
+      </section>
+
+      <section id="page-attendance" class="page hidden">
+        <div class="panel">
+          <h2>Form absensi</h2>
+          <p class="muted">Satu pengajuan per hari. Status alfa hanya dapat ditetapkan admin.</p>
+          <form id="attendanceForm">
+            <label>Status kehadiran
+              <select id="attendanceStatus" required>
+                <option value="">Pilih status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Izin">Izin</option>
+              </select>
+            </label>
+            <div id="gpsInfo" class="gps-info">Untuk status Hadir, lokasi perangkat akan diperiksa dalam radius 500 meter dari SMAN 2 Cileungsi.</div>
+            <p id="gpsStatus" class="muted">GPS belum diperiksa.</p>
+            <label>Catatan (opsional)<textarea id="attendanceNote" maxlength="300" rows="3" placeholder="Keterangan singkat"></textarea></label>
+            <label id="evidenceLabel">Bukti foto untuk sakit/izin (JPG/PNG, maks. 3 MB)
+              <input id="evidenceFile" type="file" accept="image/jpeg,image/png">
+            </label>
+            <button class="primary" type="submit">Kirim absensi</button>
+          </form>
+          <p id="attendanceMessage" class="message"></p>
+        </div>
+      </section>
+
+      <section id="page-history" class="page hidden">
+        <div class="panel"><h2>Riwayat absensi</h2><div id="historyList" class="table-wrap">Memuat riwayat...</div></div>
+      </section>
+
+      <section id="page-students" class="page hidden staff-only">
+        <div class="panel"><h2>Daftar siswa XI.3</h2><p class="muted">Daftar ini berisi akun yang sudah mendaftar. Admin dapat melengkapi nomor absen melalui profil siswa.</p><div id="studentsList" class="table-wrap">Memuat data...</div></div>
+      </section>
+
+      <section id="page-admin" class="page hidden staff-only">
+        <div class="panel">
+          <h2>Persetujuan absensi XI.3</h2>
+          <p class="muted">Guru dapat melihat seluruh pengajuan kehadiran siswa dan menyetujui atau menolaknya.</p>
+          <div id="adminList" class="table-wrap">Memuat pengajuan...</div>
+        </div>
+      </section>
+    </section>
+    <footer>Absensi XI.3 · Data hanya untuk keperluan kelas</footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

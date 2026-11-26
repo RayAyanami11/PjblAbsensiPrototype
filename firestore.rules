@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isStaff() {
+      return signedIn() && userData().role in ["admin", "teacher"];
+    }
+    function isAdmin() {
+      return signedIn() && userData().role == "admin";
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+      // Public sign-up can only create a student account.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == "student"
+        && request.resource.data.className == "XI.3";
+      // Users may edit their own profile, but cannot change their role/class/email.
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.className == resource.data.className
+        && request.resource.data.email == resource.data.email);
+      allow delete: if isAdmin();
+    }
+
+    match /attendance/{id} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.className == "XI.3"
+        && request.resource.data.status in ["Hadir", "Sakit", "Izin"]
+        && request.resource.data.reviewStatus in ["tercatat", "menunggu"]
+        && (request.resource.data.status != "Hadir" || (
+          request.resource.data.locationVerified == true
+          && request.resource.data.distanceM is number
+          && request.resource.data.distanceM <= 800
+          && request.resource.data.latitude is number
+          && request.resource.data.longitude is number
+          && request.resource.data.accuracyM is number
+          && request.resource.data.accuracyM <= 800
+        ));
+      // Teachers/admins may only update the review status; admin can manage records.
+      allow update: if isAdmin() || (isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["reviewStatus"]));
+      allow delete: if isAdmin();
+    }
+  }
+}
